@@ -56,8 +56,7 @@ Muvior/
 ├── backend/
 │   ├── main.py          # FastAPI application routes & endpoints
 │   ├── database.py      # SQLite connection & schema initialization
-│   ├── seed_db.py       # Initial database fixture seeding
-│   └── muvior.db        # Relational SQLite database
+│   └── seed_db.py       # Initial database fixture seeding
 ├── frontend/
 │   ├── app/             # Expo Router screens (onboarding, auth, tabs, admin)
 │   ├── components/      # Reusable UI widgets (LocationPicker, DatePickerModal)
@@ -65,9 +64,7 @@ Muvior/
 │   ├── hooks/           # Color scheme and responsive hooks
 │   ├── package.json     # Node dependencies & Expo config
 │   └── tsconfig.json    # TypeScript compiler configuration
-├── Latex/               # Academic documentation, ER diagrams, and LaTeX sources
-├── IMPORTANTE/          # Technical guidelines, conventions, and design specs
-└── PROJECT_REQUIREMENTS.md # Formal software requirements specification
+└── Latex/               # Academic documentation, ER diagrams, and LaTeX sources
 ```
 
 ---
@@ -86,7 +83,7 @@ python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install fastapi uvicorn pydantic
 
-# Run initial database seed
+# Run initial database seed (creates clean database with demo data)
 python3 seed_db.py
 
 # Start API server
