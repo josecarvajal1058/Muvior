@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Muvior",
+    "slug": "muvior",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo2.png",
-    "scheme": "frontend",
+    "scheme": "muvior",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {

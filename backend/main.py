@@ -1,10 +1,17 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List
-from database import get_db_connection
+from database import get_db_connection, init_db
+from security import hash_password, verify_password
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+app = FastAPI(title="Muvior API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,11 +70,11 @@ class ServiceModel(BaseModel):
 def login(user: LoginRequest):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, name, role FROM users WHERE email=? AND password=?", (user.email, user.password))
+    cursor.execute("SELECT id, name, role, password FROM users WHERE email=?", (user.email,))
     row = cursor.fetchone()
     conn.close()
 
-    if row:
+    if row and verify_password(user.password, row["password"]):
         return {"message": "Login exitoso", "role": row["role"], "user_id": row["id"], "name": row["name"]}
     
     raise HTTPException(status_code=400, detail="Credenciales inválidas")
@@ -80,9 +87,10 @@ def register(user: RegisterRequest):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
+        hashed_pw = hash_password(user.password)
         cursor.execute(
             "INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)",
-            (user.email, user.password, user.name, user.role)
+            (user.email, hashed_pw, user.name, user.role)
         )
         conn.commit()
         new_id = cursor.lastrowid

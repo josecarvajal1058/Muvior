@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from database import get_db_connection, init_db
+from security import hash_password
 
 def seed():
     conn = get_db_connection()
@@ -24,16 +25,16 @@ def seed():
 
     # USERS
     owners_data = [
-        ("carlos.perez@example.com", "123456", "Carlos Perez", "dueño"),
-        ("sofia.nails@example.com", "123456", "Sofia Ramirez", "dueño"),
-        ("jorge.tattoo@example.com", "123456", "Jorge Gonzalez", "dueño")
+        ("carlos.perez@example.com", hash_password("123456"), "Carlos Perez", "dueño"),
+        ("sofia.nails@example.com", hash_password("123456"), "Sofia Ramirez", "dueño"),
+        ("jorge.tattoo@example.com", hash_password("123456"), "Jorge Gonzalez", "dueño")
     ]
     cursor.executemany("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", owners_data)
 
     clients_data = [
-        ("user1@test.com", "123456", "Juan Duarte", "cliente"),
-        ("user2@test.com", "123456", "Pedro Martinez", "cliente"),
-        ("user3@test.com", "123456", "Ana Rodriguez", "cliente")
+        ("user1@test.com", hash_password("123456"), "Juan Duarte", "cliente"),
+        ("user2@test.com", hash_password("123456"), "Pedro Martinez", "cliente"),
+        ("user3@test.com", hash_password("123456"), "Ana Rodriguez", "cliente")
     ]
     cursor.executemany("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", clients_data)
 

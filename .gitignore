@@ -20,8 +20,11 @@ env/
 venv/
 ENV/
 *.log
+backend/muvior.db
 backend/muvior.db-shm
 backend/muvior.db-wal
+*.db
+*.sqlite3
 
 # OS & Editors
 .DS_Store
