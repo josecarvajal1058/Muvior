@@ -1,12 +1,24 @@
 # Muvior — Real-Time Queue & Booking Management Platform
 
-A cross-platform SaaS platform designed to eliminate waiting rooms in service micro-businesses (barbershops, beauty salons, and outpatient clinics) through virtual queueing and real-time appointment management.
+Muvior (*Movement + Valor*) is a cross-platform SaaS system engineered to replace crowded waiting rooms in micro-businesses (barbershops, beauty salons, and outpatient medical centers). By digitizing the traditional waiting process, Muvior allows clients to secure a virtual position in line from home while providing business owners with an operational control panel to orchestrate client flow across individual staff members.
 
 ---
 
-## Architecture Overview
+## Visual Showcase
 
-Muvior implements a decoupled client-server architecture with an asynchronous backend and an Expo-driven mobile frontend.
+<div align="center">
+  <img src="docs/screenshots/01_login.png" width="18%" alt="Login Screen" />
+  <img src="docs/screenshots/02_role_selection.png" width="18%" alt="Role Selection" />
+  <img src="docs/screenshots/03_location_picker.png" width="18%" alt="Location & Radius Picker" />
+  <img src="docs/screenshots/04_directory_feed.png" width="18%" alt="Directory Feed" />
+  <img src="docs/screenshots/05_admin_dashboard.png" width="18%" alt="Admin Operational Dashboard" />
+</div>
+
+---
+
+## Architectural Design
+
+The platform follows a decoupled client-server architecture. The mobile client communicates asynchronously with a high-performance Python service that validates business rules, computes live waiting estimates, and enforces relational integrity across users, appointments, and staff queues.
 
 ```mermaid
 graph TD
@@ -20,9 +32,7 @@ graph TD
     API -->|Async CRUD / ORM| DB
 ```
 
----
-
-## Sequence Flow: Remote Turn Allocation
+Clients discover nearby businesses, evaluate active queues, and choose a preferred specialist. The backend computes waiting times based on staff throughput, persists state transactions, and delivers live ticket confirmations to the mobile interface.
 
 ```mermaid
 sequenceDiagram
@@ -32,124 +42,59 @@ sequenceDiagram
     participant API as FastAPI Backend
     participant DB as SQLite DB
 
-    C->>App: Select Business & Staff Member
+    C->>App: Select Business & Specialist
     App->>API: POST /appointments (client_id, service_id, employee_id)
-    API->>DB: Check Availability & Active Queue Length
-    DB-->>API: Confirm slot
+    API->>DB: Check Availability & Queue Length
+    DB-->>API: Confirm slot availability
     API->>DB: INSERT appointment (status = 'PENDING')
-    DB-->>API: Appointment record
-    API-->>App: Return 201 Created (Token, Estimated Time)
-    App-->>C: Display Live Queue Ticket
+    DB-->>API: Persisted appointment ID
+    API-->>App: HTTP 201 Created (Token, Wait Time)
+    App-->>C: Render Live Queue Ticket
 ```
 
 ---
 
-## Domain Model (Class Diagram)
+## Core Engineering Capabilities
 
-```mermaid
-classDiagram
-    class User {
-        +int id
-        +string email
-        +string name
-        +string role
-    }
+The client interface is constructed with React Native and Expo Router, featuring file-based routing, hardware-accelerated transitions, and a strict dark-mode design system. State persistence handles local preferences, phone number formatting, and geographic scoping without blocking the main UI thread.
 
-    class Business {
-        +int id
-        +int owner_id
-        +string name
-        +string category
-        +string address
-        +string phone
-    }
-
-    class Employee {
-        +int id
-        +int business_id
-        +string name
-        +string specialty
-    }
-
-    class Service {
-        +int id
-        +int business_id
-        +string name
-        +float price
-        +int duration_minutes
-    }
-
-    class Appointment {
-        +int id
-        +int client_id
-        +int employee_id
-        +datetime scheduled_at
-        +string status
-    }
-
-    User "1" <-- "0..*" Business : owns
-    Business "1" *-- "1..*" Employee : employs
-    Business "1" *-- "1..*" Service : offers
-    Employee "1" o-- "0..*" Appointment : handles
-    User "1" <-- "0..*" Appointment : books
-```
+The backend service is powered by FastAPI and Python 3.12, utilizing Pydantic for request validation, structured error responses, and automatic OpenAPI schema generation. The SQLite database uses enforced foreign key constraints to maintain strict referential integrity across business profiles, services, and multi-employee schedules.
 
 ---
 
-## Tech Stack
+## Technology Stack
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Frontend** | React Native, Expo SDK 54, Expo Router, TypeScript, React Navigation |
-| **Backend** | Python 3.12, FastAPI, Pydantic, Uvicorn |
-| **Database** | SQLite (Relational Schema with Foreign Key enforcement) |
-| **Tooling** | Git, ESLint, TypeScript Compiler |
+The solution is divided across two distinct layers:
+
+- **Frontend Application:** React Native with Expo SDK 54, TypeScript, Expo Router, React Navigation, Vector Icons, and Async Storage.
+- **Backend Service:** Python 3.12, FastAPI, Pydantic, Uvicorn, and SQLite.
 
 ---
 
-## Repository Structure
+## Getting Started
 
-```text
-Muvior/
-├── backend/
-│   ├── main.py          # FastAPI REST endpoints & business logic
-│   ├── database.py      # SQLite connection & schema initialization
-│   └── seed_db.py       # Fixture seeding for local development
-├── frontend/
-│   ├── app/             # File-based routing (onboarding, tabs, admin)
-│   ├── components/      # Modular UI components (Pickers, Inputs)
-│   ├── constants/       # Design tokens & Dominican Republic presets
-│   ├── hooks/           # Custom React hooks
-│   ├── package.json     # Node dependencies & scripts
-│   └── tsconfig.json    # Strict TypeScript configuration
-└── README.md            # Technical specifications
-```
-
----
-
-## Quick Start
-
-### Backend
+### Backend Service Setup
 ```bash
 cd backend
 python3 -m venv venv
 source venv/bin/activate
 pip install fastapi uvicorn pydantic
 
-python3 seed_db.py       # Initialize & seed SQLite DB
+python3 seed_db.py
 uvicorn main:app --reload --port 8000
 ```
-Interactive OpenAPI docs: `http://localhost:8000/docs`.
+API endpoints and schemas become available at `http://localhost:8000/docs`.
 
-### Frontend
+### Mobile Frontend Setup
 ```bash
 cd frontend
 npm install
 npm start
 ```
+The application can be launched on iOS, Android, or mobile web via Expo CLI.
 
 ---
 
 ## Author
-**José Manuel Carvajal Florentino** — Software Engineering Student at **Universidad del Caribe (UNICARIBE)**.
-GitHub: [@josecarvajal1058](https://github.com/josecarvajal1058)
+
+Developed by **José Manuel Carvajal Florentino** ([@josecarvajal1058](https://github.com/josecarvajal1058)).
