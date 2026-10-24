@@ -61,7 +61,7 @@ sequenceDiagram
 
 The client interface is constructed with React Native and Expo Router, featuring file-based routing, hardware-accelerated transitions, and a dark-mode design system. State persistence handles local preferences, phone number formatting, and geographic scoping without blocking the main UI thread.
 
-The backend service is powered by FastAPI and Python 3.12, utilizing Pydantic models for request validation, PBKDF2-HMAC password hashing, automatic OpenAPI schema generation, and startup schema initialization. The SQLite database strictly enforces referential integrity through declared foreign keys and `PRAGMA foreign_keys = ON;` across 6 normalized tables (users, businesses, employees, services, appointments, and appointment_services).
+The backend service is powered by FastAPI and Python 3.12, utilizing Pydantic models for request validation, PBKDF2-HMAC password hashing, automatic OpenAPI schema generation, and startup schema initialization. The SQLite database strictly enforces referential integrity through declared foreign keys and `PRAGMA foreign_keys = ON;` across 6 relational tables (users, businesses, employees, services, appointments, and appointment_services).
 
 ---
 
