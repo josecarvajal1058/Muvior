@@ -44,8 +44,6 @@ The system follows a decoupled client-server architecture:
    - Turn status management (Call next, in-progress, completed, cancelled).
    - Metrics and schedule oversight.
 
-3. **Software Engineering Artifacts:**
-   - Formal architecture blueprints, database ER diagrams, and real-time sequence flows in `/Latex`.
 
 ---
 
