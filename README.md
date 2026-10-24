@@ -1,105 +1,155 @@
 # Muvior — Real-Time Queue & Booking Management Platform
 
-> Final Project for **Proyecto de Software I** (Software Engineering I) at **Universidad del Caribe (UNICARIBE)**.  
-> Developed by **José Manuel Carvajal Florentino**.
+A cross-platform SaaS platform designed to eliminate waiting rooms in service micro-businesses (barbershops, beauty salons, and outpatient clinics) through virtual queueing and real-time appointment management.
 
 ---
 
-## 📌 Overview
+## Architecture Overview
 
-**Muvior** (*Movement + Valor*) is a full-stack SaaS platform designed to streamline queue management, appointments, and service bookings for micro-businesses (barbershops, beauty salons, and medical clinics).
+Muvior implements a decoupled client-server architecture with an asynchronous backend and an Expo-driven mobile frontend.
 
-Its core value proposition is **"invisible waiting"**: allowing clients to take virtual turns and monitor estimated wait times from home, eliminating crowded waiting rooms and giving business owners a clear, real-time administrative dashboard.
+```mermaid
+graph TD
+    Client["Client / User\n(Mobile App)"]
+    Admin["Business Admin\n(Mobile / Web)"]
+    API["FastAPI Engine\n(REST API / CORS)"]
+    DB[("SQLite Database\n(Normalized Relational)")]
 
----
-
-## 🚀 Architecture & Tech Stack
-
-The system follows a decoupled client-server architecture:
-
-### Frontend (Mobile & Web)
-- **Framework:** [React Native](https://reactnative.dev/) with [Expo](https://expo.dev/) (SDK 54) and [Expo Router](https://docs.expo.dev/router/introduction/) (File-based routing).
-- **Language:** TypeScript.
-- **State & Storage:** Asynchronous client-side persistence via `@react-native-async-storage/async-storage`.
-- **UI & UX:** Custom dark-mode aesthetic with high-contrast palette (Carbon Black and Vibrant Orange `#d9320d`), responsive bottom tabs, modal date pickers, and localized Dominican Republic presets.
-
-### Backend (API & Engine)
-- **Framework:** [FastAPI](https://fastapi.tiangolo.com/) (Python 3.12).
-- **Data Layer:** SQLite with relational integrity, foreign keys, and seed scripts.
-- **CORS & Middleware:** Configured for cross-origin mobile and web client consumption.
-- **Data Validation:** Strict schema enforcement using [Pydantic](https://docs.pydantic.dev/).
+    Client -->|Browse & Book Queue| API
+    Admin -->|Manage Turns & Staff| API
+    API -->|Async CRUD / ORM| DB
+```
 
 ---
 
-## 🛠️ Key Features
+## Sequence Flow: Remote Turn Allocation
 
-1. **Client Experience:**
-   - Business directory with category filtering and real-time operational status.
-   - Remote turn allocation with calculated queue positions.
-   - Specialist / multi-employee selection per business.
-   - User onboarding, phone number validation, and localized address selectors.
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Client
+    participant App as Mobile App (Expo)
+    participant API as FastAPI Backend
+    participant DB as SQLite DB
 
-2. **Business Owner (Admin Dashboard):**
-   - Centralized view of active queues separated by staff members.
-   - Turn status management (Call next, in-progress, completed, cancelled).
-   - Metrics and schedule oversight.
-
+    C->>App: Select Business & Staff Member
+    App->>API: POST /appointments (client_id, service_id, employee_id)
+    API->>DB: Check Availability & Active Queue Length
+    DB-->>API: Confirm slot
+    API->>DB: INSERT appointment (status = 'PENDING')
+    DB-->>API: Appointment record
+    API-->>App: Return 201 Created (Token, Estimated Time)
+    App-->>C: Display Live Queue Ticket
+```
 
 ---
 
-## 📁 Repository Structure
+## Domain Model (Class Diagram)
+
+```mermaid
+classDiagram
+    class User {
+        +int id
+        +string email
+        +string name
+        +string role
+    }
+
+    class Business {
+        +int id
+        +int owner_id
+        +string name
+        +string category
+        +string address
+        +string phone
+    }
+
+    class Employee {
+        +int id
+        +int business_id
+        +string name
+        +string specialty
+    }
+
+    class Service {
+        +int id
+        +int business_id
+        +string name
+        +float price
+        +int duration_minutes
+    }
+
+    class Appointment {
+        +int id
+        +int client_id
+        +int employee_id
+        +datetime scheduled_at
+        +string status
+    }
+
+    User "1" <-- "0..*" Business : owns
+    Business "1" *-- "1..*" Employee : employs
+    Business "1" *-- "1..*" Service : offers
+    Employee "1" o-- "0..*" Appointment : handles
+    User "1" <-- "0..*" Appointment : books
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React Native, Expo SDK 54, Expo Router, TypeScript, React Navigation |
+| **Backend** | Python 3.12, FastAPI, Pydantic, Uvicorn |
+| **Database** | SQLite (Relational Schema with Foreign Key enforcement) |
+| **Tooling** | Git, ESLint, TypeScript Compiler |
+
+---
+
+## Repository Structure
 
 ```text
 Muvior/
 ├── backend/
-│   ├── main.py          # FastAPI application routes & endpoints
+│   ├── main.py          # FastAPI REST endpoints & business logic
 │   ├── database.py      # SQLite connection & schema initialization
-│   └── seed_db.py       # Initial database fixture seeding
+│   └── seed_db.py       # Fixture seeding for local development
 ├── frontend/
-│   ├── app/             # Expo Router screens (onboarding, auth, tabs, admin)
-│   ├── components/      # Reusable UI widgets (LocationPicker, DatePickerModal)
-│   ├── constants/       # Design tokens, theme colors, and DR regional data
-│   ├── hooks/           # Color scheme and responsive hooks
-│   ├── package.json     # Node dependencies & Expo config
-│   └── tsconfig.json    # TypeScript compiler configuration
-└── Latex/               # Academic documentation, ER diagrams, and LaTeX sources
+│   ├── app/             # File-based routing (onboarding, tabs, admin)
+│   ├── components/      # Modular UI components (Pickers, Inputs)
+│   ├── constants/       # Design tokens & Dominican Republic presets
+│   ├── hooks/           # Custom React hooks
+│   ├── package.json     # Node dependencies & scripts
+│   └── tsconfig.json    # Strict TypeScript configuration
+└── README.md            # Technical specifications
 ```
 
 ---
 
-## ⚙️ Getting Started
+## Quick Start
 
-### 1. Prerequisites
-- Node.js (>= 18) and npm/yarn.
-- Python (>= 3.10).
-- Expo Go app on your physical device or Android/iOS emulator.
-
-### 2. Backend Setup
+### Backend
 ```bash
 cd backend
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install fastapi uvicorn pydantic
 
-# Run initial database seed (creates clean database with demo data)
-python3 seed_db.py
-
-# Start API server
+python3 seed_db.py       # Initialize & seed SQLite DB
 uvicorn main:app --reload --port 8000
 ```
-API Documentation will be live at `http://localhost:8000/docs`.
+Interactive OpenAPI docs: `http://localhost:8000/docs`.
 
-### 3. Frontend Setup
+### Frontend
 ```bash
 cd frontend
 npm install
 npm start
 ```
-Scan the QR code with Expo Go or press `w` to run on the web.
 
 ---
 
-## 📄 Academic Information
-- **Course:** Proyecto de Software I.
-- **Institution:** Universidad del Caribe (UNICARIBE).
-- **Author:** José Manuel Carvajal Florentino ([@josecarvajal1058](https://github.com/josecarvajal1058)).
+## Author
+**José Manuel Carvajal Florentino** — Software Engineering Student at **Universidad del Caribe (UNICARIBE)**.
+GitHub: [@josecarvajal1058](https://github.com/josecarvajal1058)
