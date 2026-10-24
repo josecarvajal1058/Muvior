@@ -1,6 +1,9 @@
-# Muvior — Real-Time Queue & Booking Management Platform
-
-Muvior (*Movement + Valor*) is a cross-platform SaaS system engineered to replace crowded waiting rooms in micro-businesses (barbershops, beauty salons, and outpatient medical centers). By digitizing the traditional waiting process, Muvior allows clients to secure a virtual position in line from home while providing business owners with an operational control panel to orchestrate client flow across individual staff members.
+<div align="center">
+  <img src="docs/logo.png" width="140" alt="Muvior Logo" />
+  <h1>Muvior</h1>
+  <p><strong>Real-Time Queue & Booking Management Platform</strong></p>
+  <p>A cross-platform SaaS system engineered to replace crowded waiting rooms in micro-businesses (barbershops, beauty salons, and outpatient medical centers) through virtual queueing and real-time appointment management.</p>
+</div>
 
 ---
 
